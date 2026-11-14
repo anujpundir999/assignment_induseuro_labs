@@ -37,9 +37,17 @@ def expanded_help_center_blob() -> str:
         "Does not change customer policy unless an article id is cited.\n"
     )
     chunks = [base]
-    i = 0
-    while count_tokens("\n".join(chunks)) < 210_000:
+    sample = filler + "Batch 0\n" + ("-" * 40 + "\n") * 30
+    sample_tokens = count_tokens(sample)
+    approx_count = (210_000 - count_tokens(base)) // sample_tokens + 5
+    for i in range(approx_count):
         chunks.append(filler + f"Batch {i}\n" + ("-" * 40 + "\n") * 30)
+    current = count_tokens("\n".join(chunks))
+    i = approx_count
+    while current < 210_000:
+        chunk = filler + f"Batch {i}\n" + ("-" * 40 + "\n") * 30
+        chunks.append(chunk)
+        current += count_tokens(chunk)
         i += 1
     return "\n".join(chunks)
 
